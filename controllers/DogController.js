@@ -1,7 +1,6 @@
 const knex = require("knex")(require("../knexfile"));
 
 
-
 exports.index = (_req, res) => {
     knex("favoriteDogs")
       .then((data) => {
@@ -32,3 +31,21 @@ exports.create = (req, res) => {
         res.status(400).send(`Error adding dog: ${err}`);
       });
   };
+
+  exports.delete = (req, res) => {
+    const dogId = req.params.id; // Get the dog ID from the URL parameter
+  
+    knex("favoriteDogs")
+      .where({ id: dogId })
+      .del()
+      .then(() => {
+        res.status(200).send("Dog deleted successfully");
+      })
+      .catch((err) => {
+        res.status(400).send(`Error deleting dog: ${err}`);
+      });
+  };
+  
+  
+  
+  
