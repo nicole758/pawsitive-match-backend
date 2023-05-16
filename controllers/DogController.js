@@ -33,7 +33,7 @@ exports.create = (req, res) => {
   };
 
   exports.delete = (req, res) => {
-    const dogId = req.params.id; // Get the dog ID from the URL parameter
+    const dogId = req.params.id; 
   
     knex("favoriteDogs")
       .where({ id: dogId })
