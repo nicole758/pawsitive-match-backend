@@ -87,21 +87,7 @@ exports.removeFavoriteDog = (req, res) => {
         });
 };
 
-// exports.getFavoriteDogs = (req, res) => {
-//     const { userId } = req.params;
-//     console.log(userId);
 
-//     knex('user_favorite_dogs')
-//         .select('dog_id')
-//         .where({ user_id: userId })
-//         .then((favoriteDogs) => {
-//             const dogIds = favoriteDogs.map((dog) => dog.dog_id);
-//             res.status(200).json(dogIds);
-//         })
-//         .catch((err) => {
-//             res.status(400).send(`Error retrieving favorite dogs: ${err}`);
-//         });
-// };
 
 exports.getFavoriteDogs = (req, res) => {
     const { userId } = req.params;
