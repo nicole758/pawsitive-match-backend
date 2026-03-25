@@ -1,4 +1,6 @@
-const knex = require("knex")(require("../knexfile"));
+const knex = require("knex")(
+  require("../knexfile")[process.env.NODE_ENV || "development"]
+);
 
 
 exports.index = (_req, res) => {
@@ -13,37 +15,43 @@ exports.index = (_req, res) => {
 
 exports.create = (req, res) => {
   console.log(req.body);
+  const b = req.body || {};
+  const row = {
+    id: b.id,
+    name: b.name,
+    gender: b.gender,
+    age: b.age,
+    description: b.description,
+    tags: b.tags,
+    photo: b.photo,
+  };
+  if (b.shelter_name !== undefined) row.shelter_name = b.shelter_name;
+  if (b.area_label !== undefined) row.area_label = b.area_label;
+  if (b.distance_label !== undefined) row.distance_label = b.distance_label;
+
   knex("favoriteDogs")
-    .insert({
-      id: req.body.id,
-      name: req.body.name,
-      gender: req.body.gender,
-      age: req.body.age,
-      description: req.body.description,
-      tags: req.body.tags,
-      photo: req.body.photo
-    })
+    .insert(row)
     .then(() => {
       const newDogURL = `/favorite-dogs/${req.body.id}`;
-      res.status(201).location(newDogURL).send(newDogURL);
+      res.status(201).location(newDogURL).json({ id: req.body.id });
     })
     .catch((err) => {
       res.status(400).send(`Error adding dog: ${err}`);
     });
 };
 
-exports.delete = (req, res) => {
+/** Legacy: hard-delete a dog and all user_favorite_dogs rows for that dog. */
+exports.delete = async (req, res) => {
   const dogId = req.params.id;
-
-  knex("favoriteDogs")
-    .where({ id: dogId })
-    .del()
-    .then(() => {
-      res.status(200).send("Dog deleted successfully");
-    })
-    .catch((err) => {
-      res.status(400).send(`Error deleting dog: ${err}`);
+  try {
+    await knex.transaction(async (trx) => {
+      await trx("user_favorite_dogs").where({ dog_id: dogId }).del();
+      await trx("favoriteDogs").where({ id: dogId }).del();
     });
+    res.status(200).send("Dog deleted successfully");
+  } catch (err) {
+    res.status(400).send(`Error deleting dog: ${err}`);
+  }
 };
 
 
